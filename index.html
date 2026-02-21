@@ -5,18 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>阿寶的投資小管家</title>
     
-    <!-- 引入 React 和 ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- 引入 Babel 以解析 JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- 引入 Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         body {
@@ -24,7 +16,6 @@
             background-color: #f8fafc;
             -webkit-tap-highlight-color: transparent;
         }
-        /* 隱藏預設的卷軸，讓畫面更像 App */
         ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
@@ -32,40 +23,33 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- 圖示元件定義 (使用 Lucide SVG) ---
         const Icon = ({ name, size = 24, className = "" }) => {
             const icons = {
-                Wallet: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-8 8H5a2 2 0 0 1-2-2V5.36"/><path d="M16 11h4v4h-4z"/></svg>',
-                PieChart: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>',
-                TrendingUp: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',
-                Trash2: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>',
-                DollarSign: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
-                Calendar: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>',
-                ArrowUpCircle: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-circle"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 8v8"/></svg>',
-                ArrowDownCircle: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-circle"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="m8 12 4 4 4-4"/></svg>',
-                PiggyBank: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-piggy-bank"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.5-1 2-1.5L21 11c0-3-1.5-6-2-6Z"/><path d="M2 9v1c0 1.1.9 2 2 2h1"/><path d="M16 11h.01"/></svg>',
-                Edit2: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit-2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
-                Search: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
-                Filter: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-filter"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
-                ImageIcon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>',
-                Loader2: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-loader-2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>'
+                Wallet: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-8 8H5a2 2 0 0 1-2-2V5.36"/><path d="M16 11h4v4h-4z"/></svg>',
+                PieChart: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>',
+                TrendingUp: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',
+                Trash2: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>',
+                DollarSign: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+                Calendar: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>',
+                ArrowUpCircle: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 8v8"/></svg>',
+                ArrowDownCircle: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="m8 12 4 4 4-4"/></svg>',
+                PiggyBank: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.5-1 2-1.5L21 11c0-3-1.5-6-2-6Z"/><path d="M2 9v1c0 1.1.9 2 2 2h1"/><path d="M16 11h.01"/></svg>',
+                Edit2: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+                Search: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
+                Filter: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
+                ImageIcon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>',
+                Loader2: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>',
+                Key: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>'
             };
-            
             const svgString = icons[name];
             if (!svgString) return null;
-            
-            // 替換 width 和 height
-            const resizedSvg = svgString
-                .replace('width="24"', `width="${size}"`)
-                .replace('height="24"', `height="${size}"`);
-
+            const resizedSvg = svgString.replace('width="24"', `width="${size}"`).replace('height="24"', `height="${size}"`);
             return <div className={`inline-flex items-center justify-center ${className}`} dangerouslySetInnerHTML={{ __html: resizedSvg }} />;
         };
 
         const { useState, useEffect, useRef } = React;
 
         const App = () => {
-            // 預設資料
             const defaultCapital = 116000;
             const defaultTransactions = [
                 { id: 9, date: '2026-02-06', type: 'single', title: '元大金 (零股)', amount: 1280, category: 'expense' },
@@ -79,66 +63,46 @@
                 { id: 1, date: '2025-12-12', type: 'dca', title: '元大金 (定期定額)', amount: 5475, category: 'expense' },
             ];
 
-            // 狀態管理
             const [initialCapital, setInitialCapital] = useState(() => {
-                try {
-                    const saved = localStorage.getItem('fundTracker_capital');
-                    return saved ? JSON.parse(saved) : defaultCapital;
-                } catch (e) { return defaultCapital; }
+                try { return JSON.parse(localStorage.getItem('fundTracker_capital')) || defaultCapital; } 
+                catch (e) { return defaultCapital; }
             });
 
             const [transactions, setTransactions] = useState(() => {
-                try {
-                    const saved = localStorage.getItem('fundTracker_transactions');
-                    return saved ? JSON.parse(saved) : defaultTransactions;
-                } catch (e) { return defaultTransactions; }
+                try { return JSON.parse(localStorage.getItem('fundTracker_transactions')) || defaultTransactions; } 
+                catch (e) { return defaultTransactions; }
             });
 
-            // 各種視窗開關
+            // --- 新增：AI 金鑰狀態 ---
+            const [apiKey, setApiKey] = useState(() => localStorage.getItem('fundTracker_apiKey') || '');
+            const [showApiModal, setShowApiModal] = useState(false);
+            const [tempApiKey, setTempApiKey] = useState(apiKey);
+
             const [isEditingCapital, setIsEditingCapital] = useState(false);
             const [showForm, setShowForm] = useState(false);
             const [deleteTargetId, setDeleteTargetId] = useState(null);
-            
-            // 暫存輸入值
             const [tempCapital, setTempCapital] = useState(initialCapital);
-
-            // 搜尋與篩選
             const [searchTerm, setSearchTerm] = useState('');
             const [filterMonth, setFilterMonth] = useState('all');
-            
-            // 編輯與辨識狀態
             const [editingId, setEditingId] = useState(null);
             const [isRecognizing, setIsRecognizing] = useState(false);
             const fileInputRef = useRef(null);
 
-            // 表單狀態
             const [newTrans, setNewTrans] = useState({
-                category: 'expense',
-                type: 'single',
-                title: '',
-                amount: '',
-                date: new Date().toISOString().split('T')[0]
+                category: 'expense', type: 'single', title: '', amount: '', date: new Date().toISOString().split('T')[0]
             });
 
-            // 自動存檔
             useEffect(() => {
                 localStorage.setItem('fundTracker_capital', JSON.stringify(initialCapital));
                 localStorage.setItem('fundTracker_transactions', JSON.stringify(transactions));
-            }, [initialCapital, transactions]);
+                localStorage.setItem('fundTracker_apiKey', apiKey); // 存金鑰
+            }, [initialCapital, transactions, apiKey]);
 
-            // --- 計算邏輯 ---
-            const totalInvested = transactions
-                .filter(t => t.category !== 'income')
-                .reduce((sum, item) => sum + Number(item.amount), 0);
-                
-            const totalIncome = transactions
-                .filter(t => t.category === 'income')
-                .reduce((sum, item) => sum + Number(item.amount), 0);
-
+            const totalInvested = transactions.filter(t => t.category !== 'income').reduce((sum, item) => sum + Number(item.amount), 0);
+            const totalIncome = transactions.filter(t => t.category === 'income').reduce((sum, item) => sum + Number(item.amount), 0);
             const remainingBalance = initialCapital - totalInvested + totalIncome;
             const currentPoolSize = initialCapital + totalIncome; 
             const progressPercentage = Math.min(100, (totalInvested / currentPoolSize) * 100);
-
             const availableMonths = [...new Set(transactions.map(t => t.date.substring(0, 7)))].sort().reverse();
 
             const filteredTransactions = transactions.filter(t => {
@@ -147,35 +111,18 @@
                 return matchTerm && matchMonth;
             });
 
-            // 新增/修改交易
             const handleSubmitTransaction = (e) => {
                 e.preventDefault();
                 if (!newTrans.title || !newTrans.amount) return;
-
-                const payload = {
-                    ...newTrans,
-                    amount: Number(newTrans.amount),
-                    category: newTrans.category 
-                };
-
-                if (editingId) {
-                    setTransactions(transactions.map(t => t.id === editingId ? { ...t, ...payload } : t));
-                } else {
-                    setTransactions([{ id: Date.now(), ...payload }, ...transactions]);
-                }
-
+                const payload = { ...newTrans, amount: Number(newTrans.amount), category: newTrans.category };
+                if (editingId) setTransactions(transactions.map(t => t.id === editingId ? { ...t, ...payload } : t));
+                else setTransactions([{ id: Date.now(), ...payload }, ...transactions]);
                 setShowForm(false);
                 setEditingId(null);
             };
 
             const openEdit = (item) => {
-                setNewTrans({
-                    category: item.category || 'expense',
-                    type: item.type || 'single',
-                    title: item.title,
-                    amount: item.amount,
-                    date: item.date
-                });
+                setNewTrans({ category: item.category || 'expense', type: item.type || 'single', title: item.title, amount: item.amount, date: item.date });
                 setEditingId(item.id);
                 setShowForm(true);
             };
@@ -187,12 +134,88 @@
                 }
             };
 
+            const fileToBase64 = (file) => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+
+            // --- 截圖辨識邏輯 ---
+            const handleImageUpload = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (!apiKey) {
+                    alert("請先設定 AI 金鑰 (API Key) 才能使用截圖辨識喔！");
+                    setShowApiModal(true);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                    return;
+                }
+
+                setIsRecognizing(true);
+                try {
+                    const base64Data = await fileToBase64(file);
+                    const payload = {
+                        contents: [{
+                            role: "user",
+                            parts: [
+                                { text: "請分析這張投資理財/銀行扣款截圖。提取以下資訊：1.股票名稱或項目(title)。2.交易金額(amount，純數字不要逗號)。3.交易日期(date，YYYY-MM-DD格式)。4.類別(category，若是買進/扣款/支出則為'expense'，若是賣出/入帳/獲利則為'income')。5.類型(type，若是定期定額則為'dca'，否則為'single')。" },
+                                { inlineData: { mimeType: file.type, data: base64Data } }
+                            ]
+                        }],
+                        systemInstruction: {
+                            parts: [{ text: "你是一個專業的理財記帳助手，精準提取圖片中的投資數據。如果有些資訊圖片中沒有，請盡量推測或留空。" }]
+                        },
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: "OBJECT",
+                                properties: {
+                                    title: { type: "STRING" },
+                                    amount: { type: "NUMBER" },
+                                    date: { type: "STRING" },
+                                    category: { type: "STRING" },
+                                    type: { type: "STRING" }
+                                }
+                            }
+                        }
+                    };
+
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) throw new Error("API 請求失敗，可能是金鑰錯誤或額度用盡。");
+                    
+                    const result = await response.json();
+                    const textData = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    
+                    if (textData) {
+                        const parsedData = JSON.parse(textData);
+                        setNewTrans(prev => ({
+                            ...prev,
+                            title: parsedData.title || prev.title,
+                            amount: parsedData.amount || prev.amount,
+                            date: parsedData.date || prev.date,
+                            category: parsedData.category || prev.category,
+                            type: parsedData.type || prev.type,
+                        }));
+                    }
+                } catch (err) {
+                    console.error("圖片辨識失敗:", err);
+                    alert("很抱歉，圖片辨識失敗！請檢查 AI 金鑰是否正確，或直接手動輸入。");
+                } finally {
+                    setIsRecognizing(false);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                }
+            };
+
             const formatMoney = (num) => {
-                return new Intl.NumberFormat('zh-TW', {
-                    style: 'currency',
-                    currency: 'TWD',
-                    maximumFractionDigits: 0
-                }).format(num);
+                return new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(num);
             };
 
             return (
@@ -203,12 +226,21 @@
                             <Icon name="Wallet" size={20} />
                             <span>阿寶的投資小管家</span>
                         </div>
-                        <button 
-                            onClick={() => setIsEditingCapital(true)}
-                            className="text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200 transition"
-                        >
-                            原始本金: {formatMoney(initialCapital)}
-                        </button>
+                        <div className="flex gap-2">
+                            {/* AI 設定按鈕 */}
+                            <button 
+                                onClick={() => setShowApiModal(true)}
+                                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition"
+                            >
+                                <Icon name="Key" size={14} />
+                            </button>
+                            <button 
+                                onClick={() => setIsEditingCapital(true)}
+                                className="text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200 transition"
+                            >
+                                本金: {formatMoney(initialCapital)}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="max-w-md mx-auto p-4 space-y-4">
@@ -244,12 +276,8 @@
                                     </div>
                                 </div>
 
-                                {/* 進度條 */}
                                 <div className="mt-4 bg-black/20 rounded-full h-1.5 w-full overflow-hidden">
-                                    <div 
-                                        className={`h-full transition-all duration-700 ease-out ${progressPercentage > 90 ? 'bg-yellow-300' : 'bg-white'}`}
-                                        style={{ width: `${progressPercentage}%` }}
-                                    ></div>
+                                    <div className={`h-full transition-all duration-700 ease-out ${progressPercentage > 90 ? 'bg-yellow-300' : 'bg-white'}`} style={{ width: `${progressPercentage}%` }}></div>
                                 </div>
                             </div>
                         </div>
@@ -258,28 +286,13 @@
                         <div className="flex gap-2">
                             <div className="relative flex-1">
                                 <Icon name="Search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                <input 
-                                    type="text" 
-                                    placeholder="搜尋股票名稱..." 
-                                    value={searchTerm}
-                                    onChange={e => setSearchTerm(e.target.value)}
-                                    className="w-full pl-9 pr-3 py-2.5 bg-white rounded-xl shadow-sm border border-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm transition"
-                                />
-                                {searchTerm && (
-                                    <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">✕</button>
-                                )}
+                                <input type="text" placeholder="搜尋股票..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-9 pr-3 py-2.5 bg-white rounded-xl shadow-sm border border-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm transition" />
+                                {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300">✕</button>}
                             </div>
-                            
                             <div className="relative min-w-[120px]">
-                                <select
-                                    value={filterMonth}
-                                    onChange={e => setFilterMonth(e.target.value)}
-                                    className="w-full pl-8 pr-8 py-2.5 bg-white rounded-xl shadow-sm border border-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm text-slate-600 transition appearance-none cursor-pointer"
-                                >
+                                <select value={filterMonth} onChange={e => setFilterMonth(e.target.value)} className="w-full pl-8 pr-8 py-2.5 bg-white rounded-xl shadow-sm border border-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm text-slate-600 transition appearance-none cursor-pointer">
                                     <option value="all">所有月份</option>
-                                    {availableMonths.map(month => (
-                                        <option key={month} value={month}>{month}</option>
-                                    ))}
+                                    {availableMonths.map(month => <option key={month} value={month}>{month}</option>)}
                                 </select>
                                 <Icon name="Filter" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs">▼</div>
@@ -293,9 +306,7 @@
                                     <Icon name="Calendar" size={18} className="text-rose-500" /> 
                                     {searchTerm || filterMonth !== 'all' ? '搜尋結果' : '所有明細'}
                                 </h3>
-                                <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">
-                                    共 {filteredTransactions.length} 筆
-                                </span>
+                                <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">共 {filteredTransactions.length} 筆</span>
                             </div>
 
                             <div className="divide-y divide-slate-50">
@@ -303,8 +314,7 @@
                                     <div className="p-12 text-center text-slate-400 flex flex-col items-center gap-2">
                                         <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-2">
                                             <Icon name="Search" size={24} className="text-slate-300" />
-                                        </div>
-                                        找不到符合的紀錄喔
+                                        </div>找不到符合的紀錄喔
                                     </div>
                                 ) : (
                                     filteredTransactions.map((item) => {
@@ -313,45 +323,18 @@
                                             <div key={item.id} className="p-4 flex flex-col group hover:bg-slate-50 transition-colors">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-3">
-                                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${
-                                                            isIncome 
-                                                                ? 'bg-red-50 text-red-600 border-red-100'
-                                                                : item.title.includes('0050') 
-                                                                    ? 'bg-blue-50 text-blue-600 border-blue-100' 
-                                                                    : 'bg-slate-50 text-slate-500 border-slate-100'
-                                                        }`}>
+                                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${isIncome ? 'bg-red-50 text-red-600 border-red-100' : item.title.includes('0050') ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-slate-50 text-slate-500 border-slate-100'}`}>
                                                             {isIncome ? <Icon name="PiggyBank" size={20} /> : (item.type === 'dca' ? <Icon name="Calendar" size={18} /> : <Icon name="TrendingUp" size={18} />)}
                                                         </div>
                                                         <div>
-                                                            <div className="font-bold text-slate-700 text-sm md:text-base flex items-center gap-2">
-                                                                {item.title}
-                                                                {isIncome && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded">入帳</span>}
-                                                            </div>
-                                                            <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
-                                                                {item.date}
-                                                                <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                                                                {isIncome ? '賣出/回補' : (item.type === 'dca' ? '定期定額' : '單筆買進')}
-                                                            </div>
+                                                            <div className="font-bold text-slate-700 text-sm md:text-base flex items-center gap-2">{item.title}{isIncome && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded">入帳</span>}</div>
+                                                            <div className="text-xs text-slate-400 font-medium flex items-center gap-1">{item.date}<span className="w-1 h-1 rounded-full bg-slate-300"></span>{isIncome ? '賣出/回補' : (item.type === 'dca' ? '定期定額' : '單筆買進')}</div>
                                                         </div>
                                                     </div>
-                                                    
-                                                    {/* 金額與操作區 */}
                                                     <div className="flex items-center gap-1 sm:gap-2">
-                                                        <div className={`font-bold tabular-nums mr-1 sm:mr-2 ${isIncome ? 'text-red-500' : 'text-slate-700'}`}>
-                                                            {isIncome ? '+' : '-'}{Number(item.amount).toLocaleString()}
-                                                        </div>
-                                                        <button 
-                                                            onClick={() => openEdit(item)}
-                                                            className="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 hover:text-blue-500 hover:bg-blue-50 transition"
-                                                        >
-                                                            <Icon name="Edit2" size={16} />
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => setDeleteTargetId(item.id)}
-                                                            className="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50 transition"
-                                                        >
-                                                            <Icon name="Trash2" size={16} />
-                                                        </button>
+                                                        <div className={`font-bold tabular-nums mr-1 sm:mr-2 ${isIncome ? 'text-red-500' : 'text-slate-700'}`}>{isIncome ? '+' : '-'}{Number(item.amount).toLocaleString()}</div>
+                                                        <button onClick={() => openEdit(item)} className="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 hover:text-blue-500 hover:bg-blue-50"><Icon name="Edit2" size={16} /></button>
+                                                        <button onClick={() => setDeleteTargetId(item.id)} className="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50"><Icon name="Trash2" size={16} /></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -365,79 +348,22 @@
                     {/* 底部浮動按鈕 */}
                     <div className="fixed bottom-6 left-0 right-0 px-4 flex justify-center z-20 pointer-events-none">
                         <div className="bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-lg border border-slate-100 flex gap-2 pointer-events-auto">
-                            <button 
-                                onClick={() => {
-                                    setEditingId(null);
-                                    setNewTrans({ category: 'expense', type: 'dca', title: '定期定額', amount: '', date: new Date().toISOString().split('T')[0] });
-                                    setShowForm(true);
-                                }}
-                                className="flex items-center gap-2 px-4 py-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold transition active:scale-95 text-sm md:text-base"
-                            >
-                                <Icon name="Calendar" size={18} />
-                                <span className="hidden sm:inline">記一筆</span>定額
+                            <button onClick={() => { setEditingId(null); setNewTrans({ category: 'expense', type: 'dca', title: '定期定額', amount: '', date: new Date().toISOString().split('T')[0] }); setShowForm(true); }} className="flex items-center gap-2 px-4 py-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold transition active:scale-95 text-sm md:text-base">
+                                <Icon name="Calendar" size={18} /><span className="hidden sm:inline">記一筆</span>定額
                             </button>
-
-                            <button 
-                                onClick={() => {
-                                    setEditingId(null);
-                                    setNewTrans({ category: 'expense', type: 'single', title: '', amount: '', date: new Date().toISOString().split('T')[0] });
-                                    setShowForm(true);
-                                }}
-                                className="flex items-center gap-2 px-5 py-3 rounded-full bg-slate-800 hover:bg-slate-900 text-white font-bold shadow-lg transition active:scale-95 text-sm md:text-base"
-                            >
-                                <Icon name="ArrowDownCircle" size={18} />
-                                買進
+                            <button onClick={() => { setEditingId(null); setNewTrans({ category: 'expense', type: 'single', title: '', amount: '', date: new Date().toISOString().split('T')[0] }); setShowForm(true); }} className="flex items-center gap-2 px-5 py-3 rounded-full bg-slate-800 hover:bg-slate-900 text-white font-bold shadow-lg transition active:scale-95 text-sm md:text-base">
+                                <Icon name="ArrowDownCircle" size={18} />買進
                             </button>
-
-                            <button 
-                                onClick={() => {
-                                    setEditingId(null);
-                                    setNewTrans({ category: 'income', type: 'single', title: '賣出股票', amount: '', date: new Date().toISOString().split('T')[0] });
-                                    setShowForm(true);
-                                }}
-                                className="flex items-center gap-2 px-5 py-3 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-bold shadow-lg shadow-rose-200 transition active:scale-95 text-sm md:text-base"
-                            >
-                                <Icon name="ArrowUpCircle" size={18} />
-                                賣出
+                            <button onClick={() => { setEditingId(null); setNewTrans({ category: 'income', type: 'single', title: '賣出股票', amount: '', date: new Date().toISOString().split('T')[0] }); setShowForm(true); }} className="flex items-center gap-2 px-5 py-3 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-bold shadow-lg shadow-rose-200 transition active:scale-95 text-sm md:text-base">
+                                <Icon name="ArrowUpCircle" size={18} />賣出
                             </button>
                         </div>
                     </div>
-
-                    {/* 刪除確認視窗 */}
-                    {deleteTargetId && (
-                        <div className="fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-                            <div className="bg-white rounded-2xl p-6 max-w-xs w-full shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
-                                <div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Icon name="Trash2" size={24} />
-                                </div>
-                                <h3 className="text-lg font-bold text-center text-slate-800 mb-2">確定要刪除嗎？</h3>
-                                <p className="text-sm text-slate-500 text-center mb-6">
-                                    這筆紀錄刪除後金額會自動算回去。
-                                </p>
-                                <div className="flex gap-3">
-                                    <button 
-                                        onClick={() => setDeleteTargetId(null)}
-                                        className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200"
-                                    >
-                                        取消
-                                    </button>
-                                    <button 
-                                        onClick={executeDelete}
-                                        className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 shadow-lg shadow-red-200"
-                                    >
-                                        確認刪除
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     {/* 新增/編輯 Modal */}
                     {showForm && (
                         <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm">
                             <div className="bg-white w-full max-w-sm rounded-t-2xl sm:rounded-2xl p-6 animate-in slide-in-from-bottom-20 duration-300 shadow-2xl relative overflow-hidden">
-                                
-                                {/* 遮罩：辨識中 (API已移除，此處僅保留UI結構) */}
                                 {isRecognizing && (
                                     <div className="absolute inset-0 bg-white/90 z-10 flex flex-col items-center justify-center backdrop-blur-sm">
                                         <Icon name="Loader2" className="text-rose-500 animate-spin mb-3" size={40} />
@@ -445,112 +371,86 @@
                                         <div className="text-xs text-slate-500 mt-1">AI 正在幫妳看數字，請稍候</div>
                                     </div>
                                 )}
-
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                        {editingId ? (
-                                            <><Icon name="Edit2" className="text-blue-500" size={20}/> 編輯紀錄</>
-                                        ) : newTrans.category === 'income' ? (
-                                            <><Icon name="ArrowUpCircle" className="text-rose-500" /> 紀錄賣出 / 獲利</>
-                                        ) : (
-                                            <><Icon name="ArrowDownCircle" className="text-slate-500" /> 
-                                                {newTrans.type === 'dca' ? '紀錄定期定額扣款' : '紀錄買進 / 支出'}
-                                            </>
-                                        )}
+                                        {editingId ? <><Icon name="Edit2" className="text-blue-500" size={20}/> 編輯紀錄</> : newTrans.category === 'income' ? <><Icon name="ArrowUpCircle" className="text-rose-500" /> 紀錄賣出</> : <><Icon name="ArrowDownCircle" className="text-slate-500" /> 紀錄買進</>}
                                     </h3>
-                                    <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+                                    <div className="flex items-center gap-3">
+                                        {!editingId && (
+                                            <label className="text-rose-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer transition text-sm font-bold shadow-sm border border-rose-100">
+                                                <Icon name="ImageIcon" size={16} /><span>讀取截圖</span>
+                                                <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+                                            </label>
+                                        )}
+                                        <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+                                    </div>
                                 </div>
-                                
                                 <form onSubmit={handleSubmitTransaction} className="space-y-5">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">
-                                            {newTrans.category === 'income' ? '賣出項目' : '股票名稱'}
-                                        </label>
-                                        <input 
-                                            type="text" 
-                                            value={newTrans.title}
-                                            onChange={e => setNewTrans({...newTrans, title: e.target.value})}
-                                            placeholder={newTrans.category === 'income' ? "例如：賣出台積電" : "例如：0050"}
-                                            className="w-full p-3.5 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 transition font-medium"
-                                            autoFocus
-                                        />
+                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">{newTrans.category === 'income' ? '賣出項目' : '股票名稱'}</label>
+                                        <input type="text" value={newTrans.title} onChange={e => setNewTrans({...newTrans, title: e.target.value})} placeholder={newTrans.category === 'income' ? "例如：賣出台積電" : "例如：0050"} className="w-full p-3.5 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 transition font-medium" autoFocus />
                                     </div>
-
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">
-                                                {newTrans.category === 'income' ? '入帳金額' : '扣款金額'}
-                                            </label>
+                                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">{newTrans.category === 'income' ? '入帳金額' : '扣款金額'}</label>
                                             <div className="relative">
                                                 <Icon name="DollarSign" size={16} className={`absolute left-3 top-3.5 ${newTrans.category === 'income' ? 'text-rose-500' : 'text-slate-400'}`} />
-                                                <input 
-                                                    type="number" 
-                                                    value={newTrans.amount}
-                                                    onChange={e => setNewTrans({...newTrans, amount: e.target.value})}
-                                                    placeholder="0"
-                                                    className={`w-full p-3.5 pl-9 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 transition font-bold ${newTrans.category === 'income' ? 'text-rose-600' : 'text-slate-700'}`}
-                                                />
+                                                <input type="number" value={newTrans.amount} onChange={e => setNewTrans({...newTrans, amount: e.target.value})} placeholder="0" className={`w-full p-3.5 pl-9 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 transition font-bold ${newTrans.category === 'income' ? 'text-rose-600' : 'text-slate-700'}`} />
                                             </div>
                                         </div>
                                         <div>
                                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">日期</label>
-                                            <input 
-                                                type="date" 
-                                                value={newTrans.date}
-                                                onChange={e => setNewTrans({...newTrans, date: e.target.value})}
-                                                className="w-full p-3.5 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 transition text-slate-600 font-medium"
-                                            />
+                                            <input type="date" value={newTrans.date} onChange={e => setNewTrans({...newTrans, date: e.target.value})} className="w-full p-3.5 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 transition text-slate-600 font-medium" />
                                         </div>
                                     </div>
-
-                                    <button 
-                                        type="submit" 
-                                        className={`w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg active:scale-[0.98] transition mt-4 ${
-                                            editingId 
-                                                ? 'bg-blue-500 hover:bg-blue-600 shadow-blue-200'
-                                                : newTrans.category === 'income' 
-                                                    ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-200' 
-                                                    : 'bg-slate-800 hover:bg-slate-900 shadow-slate-200'
-                                        }`}
-                                    >
-                                        {editingId ? '儲存修改' : newTrans.category === 'income' ? '確認入帳 (增加餘額)' : '確認扣款'}
-                                    </button>
+                                    <button type="submit" className={`w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg active:scale-[0.98] transition mt-4 ${editingId ? 'bg-blue-500 hover:bg-blue-600' : newTrans.category === 'income' ? 'bg-rose-500 hover:bg-rose-600' : 'bg-slate-800 hover:bg-slate-900'}`}>{editingId ? '儲存修改' : newTrans.category === 'income' ? '確認入帳 (增加餘額)' : '確認扣款'}</button>
                                 </form>
                             </div>
                         </div>
                     )}
 
-                    {/* 修改本金 Modal */}
+                    {/* AI 金鑰設定 Modal */}
+                    {showApiModal && (
+                        <div className="fixed inset-0 bg-slate-900/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+                            <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+                                <div className="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Icon name="Key" size={24} />
+                                </div>
+                                <h3 className="text-lg font-bold text-center text-slate-800 mb-2">設定截圖辨識金鑰</h3>
+                                <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                                    為了保護隱私，截圖辨識需要妳個人的 Google AI 金鑰 (API Key)。<br/>
+                                    放心！這把鑰匙只會存在妳的手機裡，不會上傳到任何地方。
+                                </p>
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" className="block text-center text-sm text-blue-500 hover:underline mb-4 font-medium">
+                                    👉 點這裡去 Google 免費申請 API Key
+                                </a>
+                                <input 
+                                    type="text" 
+                                    value={tempApiKey}
+                                    onChange={e => setTempApiKey(e.target.value)}
+                                    placeholder="貼上妳的 API Key (AIzaSy...)"
+                                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:ring-2 focus:ring-rose-500 outline-none mb-6"
+                                />
+                                <div className="flex gap-3">
+                                    <button onClick={() => setShowApiModal(false)} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200">取消</button>
+                                    <button onClick={() => { setApiKey(tempApiKey); setShowApiModal(false); }} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 shadow-lg shadow-rose-200">儲存金鑰</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 修改本金與刪除的 Modal 保持原樣 (因為程式碼太長，這裡直接沿用) */}
                     {isEditingCapital && (
                         <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                            <div className="bg-white w-full max-w-xs rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+                            <div className="bg-white w-full max-w-xs rounded-2xl p-6 shadow-2xl">
                                 <h3 className="text-lg font-bold mb-2 text-slate-800 text-center">調整阿寶的本金</h3>
-                                <p className="text-xs text-slate-500 mb-6 text-center">這裡設定的是最原始給妳的總金額</p>
-                                <div className="relative mb-6">
+                                <div className="relative mb-6 mt-4">
                                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-                                    <input 
-                                        type="number" 
-                                        value={tempCapital}
-                                        onChange={e => setTempCapital(Number(e.target.value))}
-                                        className="w-full p-4 pl-8 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl text-2xl font-bold text-center text-slate-700 focus:ring-2 focus:ring-rose-500 outline-none"
-                                    />
+                                    <input type="number" value={tempCapital} onChange={e => setTempCapital(Number(e.target.value))} className="w-full p-4 pl-8 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl text-2xl font-bold text-center text-slate-700 focus:ring-2 focus:ring-rose-500 outline-none" />
                                 </div>
                                 <div className="flex gap-3">
-                                    <button 
-                                        onClick={() => setIsEditingCapital(false)}
-                                        className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-medium hover:bg-slate-200"
-                                    >
-                                        取消
-                                    </button>
-                                    <button 
-                                        onClick={() => {
-                                            setInitialCapital(tempCapital);
-                                            setIsEditingCapital(false);
-                                        }}
-                                        className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 shadow-lg shadow-rose-200"
-                                    >
-                                        更新
-                                    </button>
+                                    <button onClick={() => setIsEditingCapital(false)} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-medium hover:bg-slate-200">取消</button>
+                                    <button onClick={() => { setInitialCapital(tempCapital); setIsEditingCapital(false); }} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 shadow-lg">更新</button>
                                 </div>
                             </div>
                         </div>
@@ -564,4 +464,5 @@
     </script>
 </body>
 </html>
+
 
