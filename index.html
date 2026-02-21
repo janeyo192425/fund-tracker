@@ -73,7 +73,6 @@
                 catch (e) { return defaultTransactions; }
             });
 
-            // --- 新增：AI 金鑰狀態 ---
             const [apiKey, setApiKey] = useState(() => localStorage.getItem('fundTracker_apiKey') || '');
             const [showApiModal, setShowApiModal] = useState(false);
             const [tempApiKey, setTempApiKey] = useState(apiKey);
@@ -95,7 +94,7 @@
             useEffect(() => {
                 localStorage.setItem('fundTracker_capital', JSON.stringify(initialCapital));
                 localStorage.setItem('fundTracker_transactions', JSON.stringify(transactions));
-                localStorage.setItem('fundTracker_apiKey', apiKey); // 存金鑰
+                localStorage.setItem('fundTracker_apiKey', apiKey);
             }, [initialCapital, transactions, apiKey]);
 
             const totalInvested = transactions.filter(t => t.category !== 'income').reduce((sum, item) => sum + Number(item.amount), 0);
@@ -121,10 +120,16 @@
                 setEditingId(null);
             };
 
-            const openEdit = (item) => {
+            const openEdit = (e, item) => {
+                e.stopPropagation(); // 防止點擊干擾
                 setNewTrans({ category: item.category || 'expense', type: item.type || 'single', title: item.title, amount: item.amount, date: item.date });
                 setEditingId(item.id);
                 setShowForm(true);
+            };
+
+            const triggerDelete = (e, id) => {
+                e.stopPropagation(); // 解決點擊沒反應的問題
+                setDeleteTargetId(id);
             };
 
             const executeDelete = () => {
@@ -141,13 +146,12 @@
                 reader.onerror = error => reject(error);
             });
 
-            // --- 截圖辨識邏輯 ---
             const handleImageUpload = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
 
                 if (!apiKey) {
-                    alert("請先設定 AI 金鑰 (API Key) 才能使用截圖辨識喔！");
+                    alert("請先點右上角的鑰匙設定 AI 金鑰 (API Key) 才能使用截圖辨識喔！");
                     setShowApiModal(true);
                     if (fileInputRef.current) fileInputRef.current.value = '';
                     return;
@@ -164,9 +168,7 @@
                                 { inlineData: { mimeType: file.type, data: base64Data } }
                             ]
                         }],
-                        systemInstruction: {
-                            parts: [{ text: "你是一個專業的理財記帳助手，精準提取圖片中的投資數據。如果有些資訊圖片中沒有，請盡量推測或留空。" }]
-                        },
+                        systemInstruction: { parts: [{ text: "你是一個專業的理財記帳助手，精準提取圖片中的投資數據。" }] },
                         generationConfig: {
                             responseMimeType: "application/json",
                             responseSchema: {
@@ -189,7 +191,7 @@
                         body: JSON.stringify(payload)
                     });
                     
-                    if (!response.ok) throw new Error("API 請求失敗，可能是金鑰錯誤或額度用盡。");
+                    if (!response.ok) throw new Error("API 請求失敗");
                     
                     const result = await response.json();
                     const textData = result.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -206,8 +208,7 @@
                         }));
                     }
                 } catch (err) {
-                    console.error("圖片辨識失敗:", err);
-                    alert("很抱歉，圖片辨識失敗！請檢查 AI 金鑰是否正確，或直接手動輸入。");
+                    alert("圖片辨識失敗！請檢查金鑰或手動輸入。");
                 } finally {
                     setIsRecognizing(false);
                     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -220,31 +221,22 @@
 
             return (
                 <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-40">
-                    {/* 頂部導航 */}
                     <div className="bg-white px-4 py-3 shadow-sm sticky top-0 z-20 flex justify-between items-center">
                         <div className="flex items-center gap-2 text-rose-600 font-bold text-lg">
                             <Icon name="Wallet" size={20} />
                             <span>阿寶的投資小管家</span>
                         </div>
                         <div className="flex gap-2">
-                            {/* AI 設定按鈕 */}
-                            <button 
-                                onClick={() => setShowApiModal(true)}
-                                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition"
-                            >
+                            <button onClick={() => setShowApiModal(true)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition">
                                 <Icon name="Key" size={14} />
                             </button>
-                            <button 
-                                onClick={() => setIsEditingCapital(true)}
-                                className="text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200 transition"
-                            >
+                            <button onClick={() => setIsEditingCapital(true)} className="text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full hover:bg-slate-200 transition">
                                 本金: {formatMoney(initialCapital)}
                             </button>
                         </div>
                     </div>
 
                     <div className="max-w-md mx-auto p-4 space-y-4">
-                        {/* 核心數據卡片 */}
                         <div className="bg-gradient-to-br from-rose-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden ring-4 ring-rose-50">
                             <div className="absolute top-0 right-0 opacity-10 transform translate-x-8 -translate-y-8">
                                 <Icon name="PieChart" size={140} />
@@ -282,7 +274,6 @@
                             </div>
                         </div>
 
-                        {/* 搜尋與篩選列 */}
                         <div className="flex gap-2">
                             <div className="relative flex-1">
                                 <Icon name="Search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -299,7 +290,6 @@
                             </div>
                         </div>
 
-                        {/* 交易列表 */}
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                             <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/80 backdrop-blur">
                                 <h3 className="font-bold text-slate-700 flex items-center gap-2">
@@ -333,8 +323,9 @@
                                                     </div>
                                                     <div className="flex items-center gap-1 sm:gap-2">
                                                         <div className={`font-bold tabular-nums mr-1 sm:mr-2 ${isIncome ? 'text-red-500' : 'text-slate-700'}`}>{isIncome ? '+' : '-'}{Number(item.amount).toLocaleString()}</div>
-                                                        <button onClick={() => openEdit(item)} className="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 hover:text-blue-500 hover:bg-blue-50"><Icon name="Edit2" size={16} /></button>
-                                                        <button onClick={() => setDeleteTargetId(item.id)} className="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50"><Icon name="Trash2" size={16} /></button>
+                                                        <button onClick={(e) => openEdit(e, item)} className="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 hover:text-blue-500 hover:bg-blue-50"><Icon name="Edit2" size={16} /></button>
+                                                        {/* 修復刪除鍵沒反應的問題：加入 triggerDelete */}
+                                                        <button onClick={(e) => triggerDelete(e, item.id)} className="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 hover:text-red-500 hover:bg-red-50"><Icon name="Trash2" size={16} /></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -345,7 +336,6 @@
                         </div>
                     </div>
 
-                    {/* 底部浮動按鈕 */}
                     <div className="fixed bottom-6 left-0 right-0 px-4 flex justify-center z-20 pointer-events-none">
                         <div className="bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-lg border border-slate-100 flex gap-2 pointer-events-auto">
                             <button onClick={() => { setEditingId(null); setNewTrans({ category: 'expense', type: 'dca', title: '定期定額', amount: '', date: new Date().toISOString().split('T')[0] }); setShowForm(true); }} className="flex items-center gap-2 px-4 py-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold transition active:scale-95 text-sm md:text-base">
@@ -360,12 +350,29 @@
                         </div>
                     </div>
 
-                    {/* 新增/編輯 Modal */}
+                    {/* 強制使用 zIndex: 9999 確保刪除視窗一定在最上層 */}
+                    {deleteTargetId && (
+                        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200" style={{ zIndex: 9999 }}>
+                            <div className="bg-white rounded-2xl p-6 max-w-xs w-full shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
+                                <div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Icon name="Trash2" size={24} />
+                                </div>
+                                <h3 className="text-lg font-bold text-center text-slate-800 mb-2">確定要刪除嗎？</h3>
+                                <p className="text-sm text-slate-500 text-center mb-6">這筆紀錄刪除後金額會自動算回去。</p>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setDeleteTargetId(null)} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200">取消</button>
+                                    <button onClick={executeDelete} className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 shadow-lg shadow-red-200">確認刪除</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 修復鍵盤擋住視窗：改為從頂部往下排 (items-start pt-12) 並允許滾動 (overflow-y-auto) */}
                     {showForm && (
-                        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm">
-                            <div className="bg-white w-full max-w-sm rounded-t-2xl sm:rounded-2xl p-6 animate-in slide-in-from-bottom-20 duration-300 shadow-2xl relative overflow-hidden">
+                        <div className="fixed inset-0 bg-slate-900/60 flex items-start justify-center pt-10 px-4 sm:items-center sm:pt-0 backdrop-blur-sm overflow-y-auto" style={{ zIndex: 9999 }}>
+                            <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl relative mb-10 mt-4 sm:mt-0">
                                 {isRecognizing && (
-                                    <div className="absolute inset-0 bg-white/90 z-10 flex flex-col items-center justify-center backdrop-blur-sm">
+                                    <div className="absolute inset-0 bg-white/90 z-10 flex flex-col items-center justify-center backdrop-blur-sm rounded-2xl">
                                         <Icon name="Loader2" className="text-rose-500 animate-spin mb-3" size={40} />
                                         <div className="font-bold text-slate-700">正在讀取截圖資料...</div>
                                         <div className="text-xs text-slate-500 mt-1">AI 正在幫妳看數字，請稍候</div>
@@ -409,39 +416,24 @@
                         </div>
                     )}
 
-                    {/* AI 金鑰設定 Modal */}
                     {showApiModal && (
-                        <div className="fixed inset-0 bg-slate-900/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
-                            <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-                                <div className="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Icon name="Key" size={24} />
-                                </div>
+                        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 backdrop-blur-sm" style={{ zIndex: 9999 }}>
+                            <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl">
+                                <div className="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4"><Icon name="Key" size={24} /></div>
                                 <h3 className="text-lg font-bold text-center text-slate-800 mb-2">設定截圖辨識金鑰</h3>
-                                <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-                                    為了保護隱私，截圖辨識需要妳個人的 Google AI 金鑰 (API Key)。<br/>
-                                    放心！這把鑰匙只會存在妳的手機裡，不會上傳到任何地方。
-                                </p>
-                                <a href="https://aistudio.google.com/app/apikey" target="_blank" className="block text-center text-sm text-blue-500 hover:underline mb-4 font-medium">
-                                    👉 點這裡去 Google 免費申請 API Key
-                                </a>
-                                <input 
-                                    type="text" 
-                                    value={tempApiKey}
-                                    onChange={e => setTempApiKey(e.target.value)}
-                                    placeholder="貼上妳的 API Key (AIzaSy...)"
-                                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:ring-2 focus:ring-rose-500 outline-none mb-6"
-                                />
+                                <p className="text-xs text-slate-500 mb-4 leading-relaxed">為了保護隱私，截圖辨識需要妳個人的 Google AI 金鑰。<br/>這把鑰匙只會存在妳的手機裡，絕對安全。</p>
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" className="block text-center text-sm text-blue-500 hover:underline mb-4 font-medium">👉 點這裡去免費申請 API Key</a>
+                                <input type="text" value={tempApiKey} onChange={e => setTempApiKey(e.target.value)} placeholder="貼上妳的 API Key (AIzaSy...)" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:ring-2 focus:ring-rose-500 outline-none mb-6" />
                                 <div className="flex gap-3">
-                                    <button onClick={() => setShowApiModal(false)} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200">取消</button>
-                                    <button onClick={() => { setApiKey(tempApiKey); setShowApiModal(false); }} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 shadow-lg shadow-rose-200">儲存金鑰</button>
+                                    <button onClick={() => setShowApiModal(false)} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold">取消</button>
+                                    <button onClick={() => { setApiKey(tempApiKey); setShowApiModal(false); }} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold shadow-lg">儲存金鑰</button>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* 修改本金與刪除的 Modal 保持原樣 (因為程式碼太長，這裡直接沿用) */}
                     {isEditingCapital && (
-                        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 backdrop-blur-sm" style={{ zIndex: 9999 }}>
                             <div className="bg-white w-full max-w-xs rounded-2xl p-6 shadow-2xl">
                                 <h3 className="text-lg font-bold mb-2 text-slate-800 text-center">調整阿寶的本金</h3>
                                 <div className="relative mb-6 mt-4">
@@ -449,8 +441,8 @@
                                     <input type="number" value={tempCapital} onChange={e => setTempCapital(Number(e.target.value))} className="w-full p-4 pl-8 bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl text-2xl font-bold text-center text-slate-700 focus:ring-2 focus:ring-rose-500 outline-none" />
                                 </div>
                                 <div className="flex gap-3">
-                                    <button onClick={() => setIsEditingCapital(false)} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-medium hover:bg-slate-200">取消</button>
-                                    <button onClick={() => { setInitialCapital(tempCapital); setIsEditingCapital(false); }} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 shadow-lg">更新</button>
+                                    <button onClick={() => setIsEditingCapital(false)} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-medium">取消</button>
+                                    <button onClick={() => { setInitialCapital(tempCapital); setIsEditingCapital(false); }} className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold shadow-lg">更新</button>
                                 </div>
                             </div>
                         </div>
@@ -464,5 +456,3 @@
     </script>
 </body>
 </html>
-
-
