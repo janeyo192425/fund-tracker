@@ -2,7 +2,7 @@
 // upcoming-meeting reminder scripts.
 
 import { google } from 'googleapis';
-import { createDAVClient } from 'tsdav';
+import { createDAVClient, propfind } from 'tsdav';
 import ical from 'node-ical';
 
 export function requireEnv(name, value) {
@@ -59,22 +59,55 @@ export async function fetchCalDavEvents({ serverUrl, username, password, label, 
     const events = [];
 
     for (const cal of calendars) {
-        let objects = await client.fetchCalendarObjects({
-            calendar: cal,
-            timeRange: { start: start.toISOString(), end: end.toISOString() },
-        });
+        const calName = cal.displayName || cal.url;
+        let objects = [];
+
+        try {
+            objects = await client.fetchCalendarObjects({
+                calendar: cal,
+                timeRange: { start: start.toISOString(), end: end.toISOString() },
+            });
+        } catch (err) {
+            console.error(`CalDAV: time-range query failed for "${calName}":`, err.message);
+        }
 
         if (objects.length === 0) {
             // Some CalDAV servers (observed with DingTalk) silently ignore the
             // time-range filter and return nothing instead of everything, so
             // fall back to fetching the whole calendar and filtering locally.
-            objects = await client.fetchCalendarObjects({ calendar: cal });
-            console.log(
-                `CalDAV: calendar "${cal.displayName || cal.url}" returned 0 object(s) with time-range filter, retried without filter and got ${objects.length}`
-            );
-        } else {
-            console.log(`CalDAV: calendar "${cal.displayName || cal.url}" returned ${objects.length} object(s)`);
+            try {
+                objects = await client.fetchCalendarObjects({ calendar: cal });
+                console.log(`CalDAV: "${calName}" unfiltered query returned ${objects.length} object(s)`);
+            } catch (err) {
+                console.error(`CalDAV: unfiltered query failed for "${calName}":`, err.message);
+            }
         }
+
+        if (objects.length === 0) {
+            // Some servers reject any calendar-query REPORT outright. Fall
+            // back to a plain WebDAV PROPFIND listing of the collection and
+            // fetch each .ics resource directly (bypasses REPORT entirely).
+            try {
+                const authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+                const responses = await propfind({
+                    url: cal.url,
+                    props: { 'd:getetag': {} },
+                    depth: '1',
+                    headers: { Authorization: authHeader },
+                });
+                const hrefs = responses
+                    .map((r) => r.href)
+                    .filter((href) => typeof href === 'string' && href.toLowerCase().includes('.ics'));
+                console.log(`CalDAV: PROPFIND fallback found ${hrefs.length} .ics href(s) for "${calName}"`);
+                if (hrefs.length > 0) {
+                    objects = await client.fetchCalendarObjects({ calendar: cal, objectUrls: hrefs });
+                }
+            } catch (err) {
+                console.error(`CalDAV: PROPFIND fallback failed for "${calName}":`, err.message);
+            }
+        }
+
+        console.log(`CalDAV: "${calName}" final object count: ${objects.length}`);
 
         for (const obj of objects) {
             if (!obj.data) continue;
