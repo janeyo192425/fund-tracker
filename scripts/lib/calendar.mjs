@@ -103,9 +103,12 @@ export async function fetchCalDavEvents({ serverUrl, username, password, label, 
                 const hrefs = responses
                     .map((r) => r.href)
                     .filter((href) => typeof href === 'string' && href !== cal.url && !href.endsWith('/'));
-                console.log(`CalDAV: PROPFIND fallback found ${hrefs.length} .ics href(s) for "${calName}"`);
+                console.log(`CalDAV: PROPFIND fallback found ${hrefs.length} resource href(s) for "${calName}"`);
                 if (hrefs.length > 0) {
-                    objects = await client.fetchCalendarObjects({ calendar: cal, objectUrls: hrefs });
+                    // tsdav's default urlFilter only accepts hrefs containing ".ics",
+                    // but DingTalk's object URLs are opaque IDs with no extension.
+                    // We already picked these hrefs ourselves, so accept them all.
+                    objects = await client.fetchCalendarObjects({ calendar: cal, objectUrls: hrefs, urlFilter: () => true });
                 }
             } catch (err) {
                 console.error(`CalDAV: PROPFIND fallback failed for "${calName}":`, err.message);
