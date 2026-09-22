@@ -59,11 +59,22 @@ export async function fetchCalDavEvents({ serverUrl, username, password, label, 
     const events = [];
 
     for (const cal of calendars) {
-        const objects = await client.fetchCalendarObjects({
+        let objects = await client.fetchCalendarObjects({
             calendar: cal,
             timeRange: { start: start.toISOString(), end: end.toISOString() },
         });
-        console.log(`CalDAV: calendar "${cal.displayName || cal.url}" returned ${objects.length} object(s)`);
+
+        if (objects.length === 0) {
+            // Some CalDAV servers (observed with DingTalk) silently ignore the
+            // time-range filter and return nothing instead of everything, so
+            // fall back to fetching the whole calendar and filtering locally.
+            objects = await client.fetchCalendarObjects({ calendar: cal });
+            console.log(
+                `CalDAV: calendar "${cal.displayName || cal.url}" returned 0 object(s) with time-range filter, retried without filter and got ${objects.length}`
+            );
+        } else {
+            console.log(`CalDAV: calendar "${cal.displayName || cal.url}" returned ${objects.length} object(s)`);
+        }
 
         for (const obj of objects) {
             if (!obj.data) continue;
