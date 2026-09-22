@@ -1,0 +1,13 @@
+{
+  "name": "line-calendar-webhook",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "functions-framework --target=lineWebhook"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.4.0",
+    "googleapis": "^144.0.0"
+  }
+}
