@@ -1,0 +1,36 @@
+name: Weekly Review LINE Reminder
+
+on:
+  schedule:
+    # 18:00 Asia/Taipei (UTC+8) every Friday
+    - cron: '0 10 * * 5'
+  workflow_dispatch: {}
+
+jobs:
+  send-weekly-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install --omit=dev
+
+      - name: Send weekly review to LINE
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          GOOGLE_CALENDAR_ID: ${{ secrets.GOOGLE_CALENDAR_ID }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
+          CALDAV_SERVER_URL: ${{ secrets.CALDAV_SERVER_URL }}
+          CALDAV_USERNAME: ${{ secrets.CALDAV_USERNAME }}
+          CALDAV_PASSWORD: ${{ secrets.CALDAV_PASSWORD }}
+          CALDAV_LABEL: ${{ secrets.CALDAV_LABEL }}
+        run: npm run weekly-review-reminder

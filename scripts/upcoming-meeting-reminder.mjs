@@ -39,7 +39,8 @@ function formatUpcomingLine(event, minutesLeft, timeZone) {
     const time = event.start.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone });
     const location = event.location ? ` @ ${event.location}` : '';
     const tag = event.source === 'google' ? '' : `[${event.source}] `;
-    return `🔸 ${time}（${minutesLeft} 分鐘後）${tag}${event.title}${location}`;
+    const note = event.description ? `\n    📝 ${event.description}` : '';
+    return `🔸 ${time}（${minutesLeft} 分鐘後）${tag}${event.title}${location}${note}`;
 }
 
 async function main() {

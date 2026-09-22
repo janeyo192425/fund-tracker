@@ -1,15 +1,16 @@
 #!/usr/bin/env node
-// Fetches today's events from Google Calendar (and optionally a CalDAV
-// calendar, e.g. DingTalk/鼎加) and pushes a daily summary to LINE.
+// Fetches a day's events from Google Calendar (and optionally a CalDAV
+// calendar, e.g. DingTalk/鼎加), flags scheduling conflicts, and pushes a
+// summary to LINE. Used both for the 07:00 "today" run and the 21:00
+// "tomorrow" preview run (via DAY_OFFSET).
 //
 // Required env vars: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN,
 //                     LINE_CHANNEL_ACCESS_TOKEN, LINE_USER_ID
 // Optional env vars: GOOGLE_CALENDAR_ID (default "primary"), TIMEZONE (default "Asia/Taipei")
 //                     CALDAV_SERVER_URL, CALDAV_USERNAME, CALDAV_PASSWORD, CALDAV_LABEL (default "鼎加")
-//                     — when the three CALDAV_* credentials are all set, that calendar's
-//                       events are merged in; otherwise it's skipped.
+//                     DAY_OFFSET (default 0 = today, 1 = tomorrow)
 
-import { fetchGoogleEvents, fetchCalDavEvents, pushToLine } from './lib/calendar.mjs';
+import { fetchGoogleEvents, fetchCalDavEvents, pushToLine, detectConflicts, formatConflictLine } from './lib/calendar.mjs';
 
 const {
     GOOGLE_CLIENT_ID,
@@ -23,13 +24,15 @@ const {
     CALDAV_USERNAME,
     CALDAV_PASSWORD,
     CALDAV_LABEL,
+    DAY_OFFSET = '0',
 } = process.env;
 
-function todayRange(timeZone) {
+function dayRange(timeZone, dayOffset) {
     const now = new Date(new Date().toLocaleString('en-US', { timeZone }));
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-    return { start, end, label: `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}` };
+    const day = now.getDate() + dayOffset;
+    const start = new Date(now.getFullYear(), now.getMonth(), day, 0, 0, 0);
+    const end = new Date(now.getFullYear(), now.getMonth(), day, 23, 59, 59);
+    return { start, end, label: `${start.getFullYear()}/${start.getMonth() + 1}/${start.getDate()}` };
 }
 
 function formatEventLine(event, timeZone) {
@@ -41,20 +44,25 @@ function formatEventLine(event, timeZone) {
     return `🔸 ${time} ${tag}${event.title}${location}`;
 }
 
-function buildMessage(events, dateLabel, timeZone, warnings) {
+function buildMessage({ events, dateLabel, timeZone, warnings, conflicts, isPreview }) {
+    const headerVerb = isPreview ? '明天的行事曆預告' : '今天的行事曆';
+    const conflictLines = conflicts.length
+        ? `\n\n⚡ 行程衝突提醒\n${conflicts.map((c) => formatConflictLine(c, timeZone)).join('\n')}`
+        : '';
     const warningLines = warnings.length ? `\n\n⚠️ ${warnings.join('\n⚠️ ')}` : '';
 
     if (events.length === 0) {
-        return `📅 ${dateLabel} 今天的行事曆\n\n今天沒有安排任何行程，好好休息一下吧！${warningLines}`;
+        return `📅 ${dateLabel} ${headerVerb}\n\n${isPreview ? '明天' : '今天'}沒有安排任何行程，好好休息一下吧！${warningLines}`;
     }
 
     const sorted = [...events].sort((a, b) => a.start - b.start);
     const lines = sorted.map((event) => formatEventLine(event, timeZone));
-    return `📅 ${dateLabel} 今天的行事曆（共 ${events.length} 項）\n\n${lines.join('\n')}${warningLines}`;
+    return `📅 ${dateLabel} ${headerVerb}（共 ${events.length} 項）\n\n${lines.join('\n')}${conflictLines}${warningLines}`;
 }
 
 async function main() {
-    const { start, end, label } = todayRange(TIMEZONE);
+    const isPreview = DAY_OFFSET !== '0';
+    const { start, end, label } = dayRange(TIMEZONE, Number(DAY_OFFSET));
     const warnings = [];
 
     const googleEvents = await fetchGoogleEvents({
@@ -83,9 +91,12 @@ async function main() {
     }
 
     const events = [...googleEvents, ...calDavEvents];
-    const message = buildMessage(events, label, TIMEZONE, warnings);
+    const conflicts = detectConflicts(events);
+    const message = buildMessage({ events, dateLabel: label, timeZone: TIMEZONE, warnings, conflicts, isPreview });
     await pushToLine({ token: LINE_CHANNEL_ACCESS_TOKEN, to: LINE_USER_ID, message });
-    console.log(`Sent daily LINE reminder for ${label} (${events.length} event(s), ${warnings.length} warning(s)).`);
+    console.log(
+        `Sent ${isPreview ? 'preview' : 'daily'} LINE reminder for ${label} (${events.length} event(s), ${conflicts.length} conflict(s), ${warnings.length} warning(s)).`
+    );
 }
 
 main().catch((err) => {

@@ -33,8 +33,10 @@ export async function fetchGoogleEvents({ clientId, clientSecret, refreshToken, 
         return {
             title: event.summary || '(無標題)',
             start: allDay ? new Date(`${event.start.date}T00:00:00`) : new Date(event.start.dateTime),
+            end: allDay ? new Date(`${event.end.date}T00:00:00`) : new Date(event.end.dateTime),
             allDay,
             location: event.location || '',
+            description: event.description || '',
             source: 'google',
         };
     });
@@ -71,8 +73,10 @@ export async function fetchCalDavEvents({ serverUrl, username, password, label, 
                 events.push({
                     title: ev.summary || '(無標題)',
                     start: ev.start,
+                    end: ev.end || ev.start,
                     allDay: ev.datetype === 'date',
                     location: ev.location || '',
+                    description: ev.description || '',
                     source: label || '鼎加',
                 });
             }
@@ -80,6 +84,44 @@ export async function fetchCalDavEvents({ serverUrl, username, password, label, 
     }
 
     return events;
+}
+
+const BACK_TO_BACK_BUFFER_MINUTES = 5;
+
+// Compares timed (non-all-day) events pairwise and flags direct overlaps and
+// tight back-to-back gaps, sorted so the earlier of each pair appears first.
+export function detectConflicts(events) {
+    const timed = events.filter((e) => !e.allDay).sort((a, b) => a.start - b.start);
+    const conflicts = [];
+
+    for (let i = 0; i < timed.length; i += 1) {
+        for (let j = i + 1; j < timed.length; j += 1) {
+            const a = timed[i];
+            const b = timed[j];
+            if (b.start >= a.end) break; // timed[j+...] start even later, no more overlaps with a
+
+            conflicts.push({ type: 'overlap', a, b });
+        }
+    }
+
+    for (let i = 0; i < timed.length - 1; i += 1) {
+        const a = timed[i];
+        const b = timed[i + 1];
+        const gapMinutes = (b.start - a.end) / 60000;
+        if (gapMinutes >= 0 && gapMinutes < BACK_TO_BACK_BUFFER_MINUTES) {
+            conflicts.push({ type: 'tight-gap', a, b, gapMinutes: Math.round(gapMinutes) });
+        }
+    }
+
+    return conflicts;
+}
+
+export function formatConflictLine(conflict, timeZone) {
+    const fmt = (d) => d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone });
+    if (conflict.type === 'overlap') {
+        return `🔺 「${conflict.a.title}」（${fmt(conflict.a.start)}-${fmt(conflict.a.end)}）跟「${conflict.b.title}」（${fmt(conflict.b.start)}-${fmt(conflict.b.end)}）時間重疊，建議找代理人代開其中一場，或聯絡對方改時間`;
+    }
+    return `🔺 「${conflict.a.title}」結束後只有 ${conflict.gapMinutes} 分鐘就要開始「${conflict.b.title}」，中間幾乎沒有緩衝，建議提早出發或請對方稍等`;
 }
 
 export async function pushToLine({ token, to, message }) {
