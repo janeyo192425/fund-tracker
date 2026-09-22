@@ -95,9 +95,14 @@ export async function fetchCalDavEvents({ serverUrl, username, password, label, 
                     depth: '1',
                     headers: { Authorization: authHeader },
                 });
+                console.log(
+                    `CalDAV: PROPFIND on "${cal.url}" got ${responses.length} raw response(s): ${JSON.stringify(
+                        responses.map((r) => ({ href: r.href, status: r.status || r.props?.status }))
+                    )}`
+                );
                 const hrefs = responses
                     .map((r) => r.href)
-                    .filter((href) => typeof href === 'string' && href.toLowerCase().includes('.ics'));
+                    .filter((href) => typeof href === 'string' && href !== cal.url && !href.endsWith('/'));
                 console.log(`CalDAV: PROPFIND fallback found ${hrefs.length} .ics href(s) for "${calName}"`);
                 if (hrefs.length > 0) {
                     objects = await client.fetchCalendarObjects({ calendar: cal, objectUrls: hrefs });
