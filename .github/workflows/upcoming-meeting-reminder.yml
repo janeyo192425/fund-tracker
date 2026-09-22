@@ -1,0 +1,39 @@
+name: Upcoming Meeting LINE Reminder
+
+on:
+  schedule:
+    # Every 5 minutes. GitHub's scheduler is best-effort and can be a few
+    # minutes late, especially at peak load — this is not a precise alarm.
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  check-upcoming:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install --omit=dev
+
+      - name: Check for events starting soon
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          GOOGLE_CALENDAR_ID: ${{ secrets.GOOGLE_CALENDAR_ID }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
+          CALDAV_SERVER_URL: ${{ secrets.CALDAV_SERVER_URL }}
+          CALDAV_USERNAME: ${{ secrets.CALDAV_USERNAME }}
+          CALDAV_PASSWORD: ${{ secrets.CALDAV_PASSWORD }}
+          CALDAV_LABEL: ${{ secrets.CALDAV_LABEL }}
+          LEAD_MINUTES: '15'
+          INTERVAL_MINUTES: '5'
+        run: npm run upcoming-meeting-reminder

@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "calendar-line-reminder": "node scripts/calendar-line-reminder.mjs"
+    "calendar-line-reminder": "node scripts/calendar-line-reminder.mjs",
+    "upcoming-meeting-reminder": "node scripts/upcoming-meeting-reminder.mjs"
   },
   "dependencies": {
     "googleapis": "^144.0.0",
