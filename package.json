@@ -1,0 +1,11 @@
+{
+  "name": "fund-tracker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "calendar-line-reminder": "node scripts/calendar-line-reminder.mjs"
+  },
+  "dependencies": {
+    "googleapis": "^144.0.0"
+  }
+}
