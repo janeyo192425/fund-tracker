@@ -55,6 +55,7 @@ export async function fetchCalDavEvents({ serverUrl, username, password, label, 
     });
 
     const calendars = await client.fetchCalendars();
+    console.log(`CalDAV: found ${calendars.length} calendar(s)`);
     const events = [];
 
     for (const cal of calendars) {
@@ -62,6 +63,7 @@ export async function fetchCalDavEvents({ serverUrl, username, password, label, 
             calendar: cal,
             timeRange: { start: start.toISOString(), end: end.toISOString() },
         });
+        console.log(`CalDAV: calendar "${cal.displayName || cal.url}" returned ${objects.length} object(s)`);
 
         for (const obj of objects) {
             if (!obj.data) continue;
@@ -69,16 +71,21 @@ export async function fetchCalDavEvents({ serverUrl, username, password, label, 
             for (const key of Object.keys(parsed)) {
                 const ev = parsed[key];
                 if (ev.type !== 'VEVENT' || !ev.start) continue;
-                if (ev.start < start || ev.start > end) continue;
-                events.push({
-                    title: ev.summary || '(無標題)',
-                    start: ev.start,
-                    end: ev.end || ev.start,
-                    allDay: ev.datetype === 'date',
-                    location: ev.location || '',
-                    description: ev.description || '',
-                    source: label || '鼎加',
-                });
+
+                // Expands RRULE/EXDATE/RECURRENCE-ID properly, and also just
+                // returns the single instance for non-recurring events.
+                const instances = ical.expandRecurringEvent(ev, { from: start, to: end });
+                for (const instance of instances) {
+                    events.push({
+                        title: instance.summary || ev.summary || '(無標題)',
+                        start: instance.start,
+                        end: instance.end,
+                        allDay: instance.isFullDay,
+                        location: (instance.event && instance.event.location) || ev.location || '',
+                        description: (instance.event && instance.event.description) || ev.description || '',
+                        source: label || '鼎加',
+                    });
+                }
             }
         }
     }
