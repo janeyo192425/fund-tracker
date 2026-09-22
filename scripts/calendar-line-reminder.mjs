@@ -10,7 +10,7 @@ const {
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     GOOGLE_REFRESH_TOKEN,
-    GOOGLE_CALENDAR_ID = 'primary',
+    GOOGLE_CALENDAR_ID,
     TIMEZONE = 'Asia/Taipei',
     LINE_CHANNEL_ACCESS_TOKEN,
     LINE_USER_ID,
@@ -39,7 +39,7 @@ async function fetchTodaysEvents() {
     const { start, end, label } = todayRange(TIMEZONE);
 
     const { data } = await calendar.events.list({
-        calendarId: GOOGLE_CALENDAR_ID,
+        calendarId: GOOGLE_CALENDAR_ID || 'primary',
         timeMin: start.toISOString(),
         timeMax: end.toISOString(),
         timeZone: TIMEZONE,
