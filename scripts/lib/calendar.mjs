@@ -105,10 +105,21 @@ export async function fetchCalDavEvents({ serverUrl, username, password, label, 
                     .filter((href) => typeof href === 'string' && href !== cal.url && !href.endsWith('/'));
                 console.log(`CalDAV: PROPFIND fallback found ${hrefs.length} resource href(s) for "${calName}"`);
                 if (hrefs.length > 0) {
-                    // tsdav's default urlFilter only accepts hrefs containing ".ics",
-                    // but DingTalk's object URLs are opaque IDs with no extension.
-                    // We already picked these hrefs ourselves, so accept them all.
-                    objects = await client.fetchCalendarObjects({ calendar: cal, objectUrls: hrefs, urlFilter: () => true });
+                    // This server also rejects calendar-multiget (REPORT), so
+                    // fetch each resource with a plain authenticated GET instead
+                    // — the one operation virtually every server supports.
+                    const origin = new URL(cal.url).origin;
+                    objects = await Promise.all(
+                        hrefs.map(async (href) => {
+                            const resourceUrl = href.startsWith('http') ? href : new URL(href, origin).href;
+                            const res = await fetch(resourceUrl, { headers: { Authorization: authHeader } });
+                            if (!res.ok) {
+                                console.error(`CalDAV: GET ${resourceUrl} failed: ${res.status}`);
+                                return null;
+                            }
+                            return { url: resourceUrl, data: await res.text() };
+                        })
+                    ).then((results) => results.filter(Boolean));
                 }
             } catch (err) {
                 console.error(`CalDAV: PROPFIND fallback failed for "${calName}":`, err.message);
