@@ -34,6 +34,6 @@ jobs:
           CALDAV_USERNAME: ${{ secrets.CALDAV_USERNAME }}
           CALDAV_PASSWORD: ${{ secrets.CALDAV_PASSWORD }}
           CALDAV_LABEL: ${{ secrets.CALDAV_LABEL }}
-          LEAD_MINUTES: '15'
+          LEAD_MINUTES: '30'
           INTERVAL_MINUTES: '5'
         run: npm run upcoming-meeting-reminder
