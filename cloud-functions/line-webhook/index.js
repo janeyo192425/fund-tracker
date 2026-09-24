@@ -12,7 +12,6 @@
 // Optional: GOOGLE_CALENDAR_ID (default "primary"), TIMEZONE (default "Asia/Taipei")
 
 const crypto = require('crypto');
-const { google } = require('googleapis');
 
 const {
     LINE_CHANNEL_SECRET,
@@ -83,21 +82,39 @@ async function parseEventFromText(text) {
     return JSON.parse(jsonText);
 }
 
-async function createCalendarEvent(parsed) {
-    const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
-    oauth2Client.setCredentials({ refresh_token: GOOGLE_REFRESH_TOKEN });
-    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+async function getAccessToken() {
+    const response = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            client_id: GOOGLE_CLIENT_ID,
+            client_secret: GOOGLE_CLIENT_SECRET,
+            refresh_token: GOOGLE_REFRESH_TOKEN,
+            grant_type: 'refresh_token',
+        }),
+    });
+    if (!response.ok) throw new Error(`Token refresh failed: ${response.status} ${await response.text()}`);
+    const data = await response.json();
+    return data.access_token;
+}
 
-    const { data } = await calendar.events.insert({
-        calendarId: GOOGLE_CALENDAR_ID || 'primary',
-        requestBody: {
+async function createCalendarEvent(parsed) {
+    const accessToken = await getAccessToken();
+    const calendarId = encodeURIComponent(GOOGLE_CALENDAR_ID || 'primary');
+
+    const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({
             summary: parsed.title,
             location: parsed.location || undefined,
             start: { dateTime: `${parsed.date}T${parsed.startTime}:00`, timeZone: TIMEZONE },
             end: { dateTime: `${parsed.date}T${parsed.endTime}:00`, timeZone: TIMEZONE },
-        },
+        }),
     });
-    return data;
+
+    if (!response.ok) throw new Error(`Calendar insert failed: ${response.status} ${await response.text()}`);
+    return response.json();
 }
 
 async function replyToLine(replyToken, text) {

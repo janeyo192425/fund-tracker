@@ -7,7 +7,6 @@
     "start": "functions-framework --target=lineWebhook"
   },
   "dependencies": {
-    "@google-cloud/functions-framework": "^3.4.0",
-    "googleapis": "^144.0.0"
+    "@google-cloud/functions-framework": "^3.4.0"
   }
 }
