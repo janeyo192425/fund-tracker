@@ -47,7 +47,7 @@ async function main() {
     const now = new Date();
     const { start, end } = todayRange(TIMEZONE);
 
-    const googleEvents = await fetchGoogleEvents({
+    const googleEvents = process.env.SKIP_GOOGLE_EVENTS === 'true' ? [] : await fetchGoogleEvents({
         clientId: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
         refreshToken: GOOGLE_REFRESH_TOKEN,
