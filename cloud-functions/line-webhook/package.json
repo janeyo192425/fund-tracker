@@ -4,9 +4,11 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "functions-framework --target=lineWebhook"
+    "start": "functions-framework --target=lineWebhook",
+    "test": "node --test *.test.cjs"
   },
   "dependencies": {
-    "@google-cloud/functions-framework": "^3.4.0"
+    "@google-cloud/functions-framework": "^5.0.5",
+    "google-auth-library": "^11.1.0"
   }
 }
