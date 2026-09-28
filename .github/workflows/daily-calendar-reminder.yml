@@ -1,9 +1,6 @@
 name: Daily Calendar LINE Reminder
 
 on:
-  schedule:
-    # 07:00 Asia/Taipei (UTC+8) every day
-    - cron: '0 23 * * *'
   workflow_dispatch: {}
 
 jobs:
