@@ -4,6 +4,8 @@ The existing LINE OA `@654igszk` calls Cloud Function `line-calendar-webhook` in
 
 Supported chat flow: send a complete timed event in one message, e.g. 「明天下午3點看牙醫，提前30分鐘提醒」. Missing details prompt for a complete replacement message. Default event length is one hour and default reminder lead is 30 minutes. LINE can also remind about other timed events on this Google Calendar. Calendar popup reminders are set for bot-created events. Chat queries, editing, deletion, recurring-event creation, and multi-turn context are not implemented yet.
 
+Direct requests such as 「這週六提醒我12:30帶行李箱」 use the stated time as the reminder time (`lineLeadMinutes=0`). A local Chinese date/time parser handles common relative dates and times when Gemini is unavailable. If neither parser can identify a complete event, the bot asks for a complete replacement message. On 2026-09-28 a live message failed because Gemini returned HTTP 402; the local parser and error reply were added, and 11 tests passed locally and in Cloud Shell. The missed 2026-10-03 12:30 reminder was added manually and a LINE confirmation push was accepted (HTTP 200).
+
 The older GitHub `upcoming-meeting-reminder` remains scheduled but now skips Google Calendar so it can still notify for the existing CalDAV source. Morning/evening/weekly workflows are unchanged.
 
 Secrets remain in Google Cloud environment settings. Do not copy their values into commits or logs. `LINE_USER_ID`, `SCHEDULER_EMAIL`, `SCHEDULER_AUDIENCE` and `REMINDERS_ENABLED=true` are required for the live reminder endpoint. Avoid changing the webhook URL in LINE Manager; it points to the existing Cloud Function.
