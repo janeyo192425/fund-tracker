@@ -1,0 +1,13 @@
+# LINE Calendar assistant operations
+
+The existing LINE OA `@654igszk` calls Cloud Function `line-calendar-webhook` in Google Cloud project `gen-lang-client-0095115516` (`asia-east1`). The deployed function uses Node.js 22. Google Calendar stores events and per-event reminder state. Cloud Scheduler job `line-calendar-reminders` calls the `/reminders` endpoint once per minute with an OIDC token from the project's existing compute service account. The endpoint checks the audience and verified service-account email. The LINE webhook verifies its signature and accepts only the configured owner `LINE_USER_ID`.
+
+Supported chat flow: send a complete timed event in one message, e.g. 「明天下午3點看牙醫，提前30分鐘提醒」. Missing details prompt for a complete replacement message. Default event length is one hour and default reminder lead is 30 minutes. LINE can also remind about other timed events on this Google Calendar. Calendar popup reminders are set for bot-created events. Chat queries, editing, deletion, recurring-event creation, and multi-turn context are not implemented yet.
+
+The older GitHub `upcoming-meeting-reminder` remains scheduled but now skips Google Calendar so it can still notify for the existing CalDAV source. Morning/evening/weekly workflows are unchanged.
+
+Secrets remain in Google Cloud environment settings. Do not copy their values into commits or logs. `LINE_USER_ID`, `SCHEDULER_EMAIL`, `SCHEDULER_AUDIENCE` and `REMINDERS_ENABLED=true` are required for the live reminder endpoint. Avoid changing the webhook URL in LINE Manager; it points to the existing Cloud Function.
+
+Local verification: `npm ci` and `npm test` in this directory. On 2026-09-28, all 8 tests passed locally and in Cloud Shell. A temporary Google Calendar event triggered a successful LINE push; its `lineRemindedStart` marker was present, and the test event was deleted (Calendar API 204). Cloud Run request logs recorded HTTP 200 for the scheduled endpoint. The LINE client display was not observed directly.
+
+Cloud Scheduler delivery is best-effort. Reminders can arrive later than the exact minute. The function catches checks up to five minutes after event start; it uses Google Calendar private properties and a deterministic LINE retry key to avoid repeat pushes. The free Google Cloud trial shown during setup expires 2026-12-24. Before that date, confirm the project's continued hosting plan; do not upgrade billing without the account owner's decision.
