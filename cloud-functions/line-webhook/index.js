@@ -15,6 +15,7 @@ const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
 const { eventTimes } = require('./time.cjs');
 const { runReminders } = require('./reminders.cjs');
+const { runDailySummary } = require('./daily-summary.cjs');
 const { parseLocal } = require('./parse-local.cjs');
 const oidc = new OAuth2Client();
 let geminiUnavailable = false;
@@ -206,7 +207,11 @@ exports.lineWebhook = async (req, res) => {
             const claims = ticket.getPayload();
             if (!claims.email_verified || claims.email !== SCHEDULER_EMAIL) return res.status(403).send('Forbidden');
         } catch { return res.status(401).send('Unauthorized'); }
-        try { return res.status(200).json(await runReminders(await getAccessToken())); }
+        try {
+            const reminders = await runReminders(await getAccessToken());
+            const summary = await runDailySummary();
+            return res.status(200).json({ reminders, summary });
+        }
         catch (error) { console.error('Reminder error:', error.message); return res.status(503).send('Retry later'); }
     }
 
