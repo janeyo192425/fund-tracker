@@ -15,7 +15,9 @@ const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
 const { eventTimes } = require('./time.cjs');
 const { runReminders } = require('./reminders.cjs');
+const { parseLocal } = require('./parse-local.cjs');
 const oidc = new OAuth2Client();
+let geminiUnavailable = false;
 
 const {
     LINE_CHANNEL_SECRET,
@@ -45,6 +47,10 @@ function todayInfo() {
 }
 
 async function parseEventFromText(text) {
+    // Direct reminder requests must fire at the stated time, not 30 minutes early.
+    const local = parseLocal(text);
+    if (local.valid && /提醒我|提醒一下|到時提醒/.test(text) && !/提前\s*\d+/.test(text)) return local;
+    if (geminiUnavailable) return local;
     const { dateStr, weekday } = todayInfo();
     const prompt = `你是行事曆助理。今天是 ${dateStr}（星期${weekday}），時區 ${TIMEZONE}。請把使用者訊息解析成一個行事曆事件。使用者訊息：「${text}」
 
@@ -57,7 +63,8 @@ async function parseEventFromText(text) {
 - 如果使用者沒說結束時間，endTime 留空（呼叫端會預設抓開始時間加 1 小時）
 - 如果訊息完全不像是要新增行程（例如只是打招呼、問問題、跟行程無關的閒聊），把 valid 設為 false，其他欄位可留空`;
 
-    const response = await fetch(
+    let response;
+    try { response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
         {
             method: 'POST',
@@ -83,13 +90,21 @@ async function parseEventFromText(text) {
                 },
             }),
         }
-    );
+    ); } catch (error) {
+        console.warn('Gemini unavailable; using local parser:', error.message);
+        return local;
+    }
 
-    if (!response.ok) throw new Error(`Gemini API error: ${response.status}`);
+    if (!response.ok) {
+        if (response.status === 402) geminiUnavailable = true;
+        console.warn(`Gemini API returned ${response.status}; using local parser`);
+        return local;
+    }
     const data = await response.json();
     const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!jsonText) throw new Error('Gemini returned no content');
-    return JSON.parse(jsonText);
+    if (!jsonText) return local;
+    try { return JSON.parse(jsonText); }
+    catch { return local; }
 }
 
 async function getAccessToken() {
@@ -171,7 +186,7 @@ async function handleTextMessage(event) {
         );
     } catch (err) {
         console.error('Failed to handle message:', err.message);
-        throw err;
+        await replyToLine(event.replyToken, '抱歉，這筆行程目前建立失敗，請稍後再試一次。');
     }
 }
 
