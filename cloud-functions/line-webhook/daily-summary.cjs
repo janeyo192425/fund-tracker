@@ -56,13 +56,20 @@ async function runDailySummary(now = new Date(), env = process.env) {
     refreshToken: env.GOOGLE_REFRESH_TOKEN, calendarId: env.GOOGLE_CALENDAR_ID,
     timeZone: TIME_ZONE, start, end,
   });
-  const caldav = await fetchCalDavEvents({
-    serverUrl: env.CALDAV_SERVER_URL, username: env.CALDAV_USERNAME,
-    password: env.CALDAV_PASSWORD, label: env.CALDAV_LABEL, start, end,
-  });
+  let caldav = [];
+  const warnings = [];
+  try {
+    caldav = await fetchCalDavEvents({
+      serverUrl: env.CALDAV_SERVER_URL, username: env.CALDAV_USERNAME,
+      password: env.CALDAV_PASSWORD, label: env.CALDAV_LABEL, start, end,
+    });
+  } catch (error) {
+    console.error('Daily summary CalDAV fetch failed:', error);
+    warnings.push('公司行事曆暫時無法讀取，請另外確認。');
+  }
   const events = [...google, ...caldav];
   const conflicts = detectConflicts(events);
-  const message = formatMessage(date, events, conflicts, formatConflictLine);
+  const message = formatMessage(date, events, conflicts, formatConflictLine, warnings);
   const response = await fetch('https://api.line.me/v2/bot/message/push', {
     method: 'POST', signal: AbortSignal.timeout(20000),
     headers: {
