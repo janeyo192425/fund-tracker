@@ -2,6 +2,16 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { parseLocal } = require('./parse-local.cjs');
 
+test('monthly payment reminder starts at the next 26th and repeats monthly', () => {
+  const parsed = parseLocal('每個月的26號都幫我設定提醒繳第一銀行信用卡 10:00', new Date('2026-09-30T01:00:00Z'));
+  assert.equal(parsed.valid, true);
+  assert.equal(parsed.title, '繳第一銀行信用卡');
+  assert.equal(parsed.date, '2026-10-26');
+  assert.equal(parsed.startTime, '10:00');
+  assert.equal(parsed.reminderMinutes, 0);
+  assert.equal(parsed.recurrence, 'RRULE:FREQ=MONTHLY;BYMONTHDAY=26');
+});
+
 const monday = new Date('2026-09-28T02:41:00Z');
 
 test('direct Saturday reminder fires at 12:30 and keeps the packing list', () => {
