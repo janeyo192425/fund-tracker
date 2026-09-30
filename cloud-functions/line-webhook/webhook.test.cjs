@@ -27,3 +27,28 @@ test('reminder endpoint requires authentication', async () => {
   process.env.SCHEDULER_EMAIL='scheduler@example.com'; process.env.SCHEDULER_AUDIENCE='https://example.com/reminders';
   const res=response(); await lineWebhook({method:'POST',path:'/reminders',get:()=>''},res); assert.equal(res.code,401);
 });
+
+test('monthly chat instruction creates a recurring event with a same-time reminder', async () => {
+  const original = global.fetch;
+  let inserted, reply;
+  global.fetch = async (url, options) => {
+    if (url === 'https://oauth2.googleapis.com/token') return { ok: true, json: async () => ({ access_token: 'test-token' }) };
+    if (url.startsWith('https://www.googleapis.com/calendar/v3/calendars/')) {
+      inserted = JSON.parse(options.body);
+      return { ok: true, status: 200, json: async () => ({ summary: inserted.summary, start: inserted.start, end: inserted.end }) };
+    }
+    if (url === 'https://api.line.me/v2/bot/message/reply') { reply = JSON.parse(options.body); return { ok: true }; }
+    throw new Error(`Unexpected network call: ${url}`);
+  };
+  try {
+    const res = response();
+    await lineWebhook(request([{ type: 'message', source: { type: 'user', userId: 'owner' },
+      webhookEventId: 'monthly-test', message: { type: 'text', text: '每個月的26號都幫我設定提醒繳第一銀行信用卡 10:00' }, replyToken: 'reply' }]), res);
+    assert.equal(res.code, 200);
+    assert.equal(inserted.summary, '繳第一銀行信用卡');
+    assert.deepEqual(inserted.recurrence, ['RRULE:FREQ=MONTHLY;BYMONTHDAY=26']);
+    assert.deepEqual(inserted.reminders.overrides, [{ method: 'popup', minutes: 0 }]);
+    assert.equal(inserted.extendedProperties.private.lineLeadMinutes, '0');
+    assert.match(reply.messages[0].text, /每月重複/);
+  } finally { global.fetch = original; }
+});
