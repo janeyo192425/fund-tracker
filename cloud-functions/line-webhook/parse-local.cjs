@@ -11,6 +11,17 @@ function taipeiToday(now) {
 function dateString(value) { return value.toISOString().slice(0, 10); }
 function addDays(value, days) { return new Date(value.getTime() + days * 86400000); }
 
+function nextMonthlyDate(day, time, now) {
+  const base = taipeiToday(now);
+  for (let offset = 0; offset < 13; offset++) {
+    const candidate = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth() + offset, day));
+    if (candidate.getUTCDate() !== day) continue;
+    const date = dateString(candidate);
+    if (new Date(`${date}T${time}:00+08:00`) > now) return date;
+  }
+  return null;
+}
+
 function parseDate(text, now) {
   const base = taipeiToday(now);
   let match = text.match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
@@ -49,6 +60,23 @@ function parseTime(text) {
 }
 
 function parseLocal(text, now = new Date()) {
+  const monthly = text.match(/每(?:個)?月(?:的)?\s*(\d{1,2})\s*(?:號|日)/);
+  if (monthly) {
+    const day = Number(monthly[1]);
+    const time = parseTime(text);
+    if (day < 1 || day > 31 || !time) return { valid: false, question: '請提供每月幾號、時間和提醒內容。' };
+    const date = nextMonthlyDate(day, time.time, now);
+    const leadMatch = text.match(/提前\s*(\d{1,4})\s*(分鐘|分|小時|時)\s*提醒/);
+    const reminderMinutes = leadMatch ? Number(leadMatch[1]) * (leadMatch[2].includes('小時') || leadMatch[2] === '時' ? 60 : 1) : 0;
+    const title = text.replace(monthly[0], ' ').replace(time.token, ' ')
+      .replace(/提前\s*\d{1,4}\s*(?:分鐘|分|小時|時)\s*提醒/g, ' ')
+      .replace(/^(?:\s*都)?\s*(?:請)?\s*(?:幫我)?\s*(?:設定)?\s*(?:提醒我?|記得提醒我?)?/, '')
+      .replace(/\s+/g, ' ').trim();
+    if (!title) return { valid: false, question: '每月要提醒什麼事？請把日期、時間和內容寫在同一則訊息。' };
+    return { valid: true, title: title.slice(0, 240), date, startTime: time.time,
+      endTime: '', endDate: '', location: '', reminderMinutes,
+      recurrence: `RRULE:FREQ=MONTHLY;BYMONTHDAY=${day}` };
+  }
   const date = parseDate(text, now);
   const time = parseTime(text);
   if (!date || !time) return { valid: false, question: '請在同一則訊息提供日期、時間和提醒內容，例如：「這週六中午12:30提醒我帶行李箱」。' };
