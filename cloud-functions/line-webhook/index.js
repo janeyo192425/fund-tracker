@@ -50,6 +50,7 @@ function todayInfo() {
 async function parseEventFromText(text) {
     // Direct reminder requests must fire at the stated time, not 30 minutes early.
     const local = parseLocal(text);
+    if (local.valid && local.recurrence) return local;
     if (local.valid && /提醒我|提醒一下|到時提醒/.test(text) && !/提前\s*\d+/.test(text)) return local;
     if (geminiUnavailable) return local;
     const { dateStr, weekday } = todayInfo();
@@ -137,6 +138,7 @@ async function createCalendarEvent(parsed, event) {
         body: JSON.stringify({
             id,
             summary: parsed.title,
+            recurrence: parsed.recurrence ? [parsed.recurrence] : undefined,
             location: parsed.location || undefined,
             start: { dateTime: parsed.times.start.toISOString(), timeZone: TIMEZONE },
             end: { dateTime: parsed.times.end.toISOString(), timeZone: TIMEZONE },
@@ -183,7 +185,7 @@ async function handleTextMessage(event) {
         const format = value => new Date(value).toLocaleString('zh-TW', { timeZone: TIMEZONE, hour12: false });
         await replyToLine(
             event.replyToken,
-            `✅ 已加入 Google 日曆\n${created.summary}\n${format(created.start.dateTime)} ～ ${format(created.end.dateTime)}\n${process.env.REMINDERS_ENABLED === 'true' ? `⏰ LINE 提前 ${parsed.times.lead} 分鐘提醒` : 'Google 日曆提醒已設定，LINE 自動提醒尚在設定中。'}`
+            `✅ 已加入 Google 日曆\n${created.summary}\n${format(created.start.dateTime)} ～ ${format(created.end.dateTime)}${parsed.recurrence ? '\n🔁 每月重複' : ''}\n${process.env.REMINDERS_ENABLED === 'true' ? parsed.times.lead === 0 ? '⏰ LINE 於活動時間提醒' : `⏰ LINE 提前 ${parsed.times.lead} 分鐘提醒` : 'Google 日曆提醒已設定，LINE 自動提醒尚在設定中。'}`
         );
     } catch (err) {
         console.error('Failed to handle message:', err.message);
