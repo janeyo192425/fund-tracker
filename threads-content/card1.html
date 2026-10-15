@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:1080px;height:1350px;background:#f6ecd9;font-family:"WenQuanYi Zen Hei","Noto Sans CJK TC",sans-serif;color:#2b2118;position:relative;overflow:hidden}
+  .frame{position:absolute;inset:28px;border:4px solid #2b2118;border-radius:28px}
+  .tag{position:absolute;top:72px;left:80px;background:#2b2118;color:#f6ecd9;font-size:34px;padding:8px 26px;border-radius:40px;letter-spacing:2px}
+  .title{position:absolute;top:150px;left:80px;right:80px;font-size:96px;line-height:1.18;font-weight:900;letter-spacing:2px}
+  .title span{color:#b8321f}
+  .sub{position:absolute;top:400px;left:80px;right:80px;font-size:54px;line-height:1.35;font-weight:700}
+  .sub b{background:linear-gradient(transparent 70%,#f3b73c 70%);font-weight:900}
+  svg.scene{overflow:visible;position:absolute;top:520px;left:60px}
+  .points{position:absolute;left:80px;right:80px;top:1010px}
+  .pt{display:flex;align-items:center;gap:22px;font-size:40px;margin-bottom:12px;font-weight:700}
+  .pt i{flex:0 0 52px;height:52px;border-radius:50%;background:#b8321f;color:#fff;font-style:normal;font-size:34px;display:flex;align-items:center;justify-content:center}
+  .foot{position:absolute;bottom:62px;left:80px;right:80px;display:flex;justify-content:space-between;font-size:30px;color:#6b5a48}
+</style></head><body>
+<div class="frame"></div>
+<div class="tag">今日職場避雷｜面試</div>
+<div class="title">面試最可怕的<br>不是被刁難</div>
+<div class="sub">是問不到<b>「上一位為什麼離職」</b></div>
+
+<svg class="scene" width="960" height="460" viewBox="0 0 960 460">
+  <!-- floor shadow -->
+  <ellipse cx="480" cy="440" rx="440" ry="14" fill="#d9c7a3"/>
+  <!-- interviewer owl (right, behind desk) -->
+  <g transform="translate(640,70)">
+    <ellipse cx="90" cy="190" rx="95" ry="120" fill="#8a6a4a"/>
+    <ellipse cx="90" cy="215" rx="62" ry="80" fill="#e8d3a8"/>
+    <circle cx="90" cy="95" r="78" fill="#8a6a4a"/>
+    <polygon points="30,40 48,0 72,32" fill="#8a6a4a"/>
+    <polygon points="150,40 132,0 108,32" fill="#8a6a4a"/>
+    <circle cx="62" cy="92" r="28" fill="#fff8e8" stroke="#2b2118" stroke-width="6"/>
+    <circle cx="118" cy="92" r="28" fill="#fff8e8" stroke="#2b2118" stroke-width="6"/>
+    <line x1="90" y1="92" x2="90" y2="92" stroke="#2b2118" stroke-width="6"/>
+    <circle cx="66" cy="96" r="9" fill="#2b2118"/>
+    <circle cx="122" cy="96" r="9" fill="#2b2118"/>
+    <polygon points="82,118 98,118 90,138" fill="#f3b73c"/>
+    <!-- clipboard -->
+    <rect x="-10" y="170" width="78" height="100" rx="8" fill="#fff8e8" stroke="#2b2118" stroke-width="5"/>
+    <rect x="12" y="160" width="34" height="18" rx="5" fill="#2b2118"/>
+    <line x1="6" y1="200" x2="56" y2="200" stroke="#2b2118" stroke-width="4"/>
+    <line x1="6" y1="222" x2="56" y2="222" stroke="#2b2118" stroke-width="4"/>
+    <line x1="6" y1="244" x2="40" y2="244" stroke="#2b2118" stroke-width="4"/>
+  </g>
+  <!-- desk -->
+  <rect x="330" y="270" width="610" height="26" rx="8" fill="#b57a45" stroke="#2b2118" stroke-width="5"/>
+  <rect x="360" y="296" width="30" height="144" fill="#9a6535" stroke="#2b2118" stroke-width="5"/>
+  <rect x="880" y="296" width="30" height="144" fill="#9a6535" stroke="#2b2118" stroke-width="5"/>
+  <!-- capybara (left, interviewee) -->
+  <g transform="translate(70,80)">
+    <ellipse cx="170" cy="250" rx="140" ry="105" fill="#b9854f" stroke="#2b2118" stroke-width="6"/>
+    <ellipse cx="170" cy="278" rx="92" ry="66" fill="#d7ac78"/>
+    <!-- head -->
+    <rect x="45" y="30" width="250" height="170" rx="85" fill="#b9854f" stroke="#2b2118" stroke-width="6"/>
+    <circle cx="82" cy="40" r="26" fill="#a2713f" stroke="#2b2118" stroke-width="6"/>
+    <circle cx="260" cy="40" r="26" fill="#a2713f" stroke="#2b2118" stroke-width="6"/>
+    <!-- snout -->
+    <rect x="170" y="100" width="130" height="94" rx="42" fill="#d7ac78" stroke="#2b2118" stroke-width="6"/>
+    <ellipse cx="258" cy="118" rx="9" ry="12" fill="#2b2118"/>
+    <ellipse cx="220" cy="118" rx="9" ry="12" fill="#2b2118"/>
+    <path d="M226 160 q20 14 40 0" stroke="#2b2118" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <!-- eyes (worried) -->
+    <circle cx="120" cy="100" r="14" fill="#2b2118"/>
+    <circle cx="124" cy="95" r="5" fill="#fff"/>
+    <path d="M98 74 l40 -10" stroke="#2b2118" stroke-width="6" stroke-linecap="round"/>
+    <!-- sweat -->
+    <path d="M62 120 q-14 24 0 36 q14 -12 0 -36z" fill="#8fd0ee" stroke="#2b2118" stroke-width="4"/>
+    <!-- paws on desk -->
+    <ellipse cx="300" cy="262" rx="40" ry="24" fill="#b9854f" stroke="#2b2118" stroke-width="6"/>
+  </g>
+  <!-- speech bubble from capybara -->
+  <g>
+    <rect x="30" y="0" width="400" height="84" rx="26" fill="#fff8e8" stroke="#2b2118" stroke-width="6"/>
+    <path d="M150 82 l24 36 l22 -36" fill="#fff8e8" stroke="#2b2118" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="152" y="78" width="42" height="10" fill="#fff8e8"/>
+    <text x="230" y="55" font-size="36" font-weight="900" text-anchor="middle" fill="#2b2118">上一位為什麼離職？</text>
+  </g>
+  <!-- owl reply bubble -->
+  <g>
+    <rect x="560" y="30" width="360" height="112" rx="26" fill="#fff8e8" stroke="#b8321f" stroke-width="6"/>
+    <path d="M700 140 l18 34 l22 -34" fill="#fff8e8" stroke="#b8321f" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="704" y="136" width="34" height="10" fill="#fff8e8"/>
+    <text x="740" y="78" font-size="34" font-weight="900" text-anchor="middle" fill="#b8321f">呃…這個嘛…</text>
+    <text x="740" y="118" font-size="34" font-weight="900" text-anchor="middle" fill="#b8321f">他有自己的規劃</text>
+  </g>
+</svg>
+
+<div class="points">
+  <div class="pt"><i>1</i>迴避問題，或笑著帶過</div>
+  <div class="pt"><i>2</i>只說「他有自己的規劃」</div>
+  <div class="pt"><i>3</i>這個職位已經換了三個人</div>
+</div>
+<div class="foot"><span>@icallit.tw｜每天一張職場避雷圖</span><span>先看再簽</span></div>
+</body></html>
